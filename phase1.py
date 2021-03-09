@@ -1,5 +1,5 @@
-#   onoma Am username
-#   onoma Am username
+#   Antoniou Christodoulos 2641 cs02641@uoi.gr
+#   Tsiouri Angeliki 3354 cs03354@uoi.gr
 
 
 import sys
@@ -77,31 +77,30 @@ printToken = 45
 
 
 # Token Types
-identifierToken = 50
-numberToken = 100
-plusToken = 150
-minusToken = 200
-mulToken = 250
-divToken = 300
-leftCurlyBracketToken = 350
-rightCurlyBracketToken = 400
-leftParenthesisToken = 450
-rightParenthesisToken = 500
-leftSquareBracketToken = 550
-rightSquareBracketToken = 600
-commaToken = 650
-semicolonToken = 700
-#colonToken = '35'
-assignmentToken = 750
-greaterToken = 800
-greaterOrEqualToken = 850
-lesserToken = 900
-lesserOrEqualToken = 950
-equalToken = 1000
-notEqualToken = 1050
-EOFToken = 2000
-dotToken = 2050
-hashtagToken = 2100
+identifierToken = 46
+numberToken = 47
+plusToken = 48
+minusToken = 49
+mulToken = 50
+divToken = 51
+leftCurlyBracketToken = 52
+rightCurlyBracketToken = 53
+leftParenthesisToken = 54
+rightParenthesisToken = 55
+leftSquareBracketToken = 56
+rightSquareBracketToken = 57
+commaToken = 58
+semicolonToken = 59
+assignmentToken = 60
+greaterToken = 61
+greaterOrEqualToken = 62
+lesserToken = 63
+lesserOrEqualToken = 64
+equalToken = 65
+notEqualToken = 66
+EOFToken = 67
+dotToken = 68
+hashtagToken = 69
 
 #endregion
 
@@ -125,7 +124,7 @@ lexTable = [
     # idk state
     [identifierToken , identifierToken , identifierToken , idkState , idkState , identifierToken , identifierToken , identifierToken , identifierToken,
     identifierToken , identifierToken ,identifierToken , identifierToken , identifierToken , identifierToken , identifierToken , identifierToken , identifierToken,
-    identifierToken , identifierToken , identifierToken , identifierToken , identifierToken , identifierToken , Invalid_Symbol_Error_Code],
+    identifierToken , identifierToken , identifierToken , identifierToken , identifierToken , identifierToken , identifierToken],
 
     # asgn state
     [Assignment_Error_Code , Assignment_Error_Code , Assignment_Error_Code , Assignment_Error_Code , Assignment_Error_Code , Assignment_Error_Code,
@@ -177,13 +176,7 @@ class Token:
         self.lineNo = lineNo
 
 
-#inputFile = open(sys.argv[1])
-inputFile = open("factorial.ci","r")
-
-global line
-line = 1
-
-# lex reads the characters of the input file and finds the next token
+# lex() reads the characters of the input file and finds the next token
 # returns a token class object
 # in case of error the corresponding message is printed along with the line where it occured
 def lex():
@@ -192,12 +185,11 @@ def lex():
     tokenString = ''
     global line
 
-    while state >=0 and state <= 6:
+    # findCharacterToken() finds and returns the token of the given character 
+    def findCharacterToken():
 
-        character = inputFile.read(1)
-        #print('Character:', character)
+        global line
 
-        # TODO function for tokens
         if character == ' ':
             token = space
 
@@ -274,143 +266,928 @@ def lex():
         else:
             token = other
         
+        return token
 
-        state = lexTable[state][token]
-        #print('state:', state)
-
-        if state != startState and state != remState:
-            tokenString += character
-
-
-    if state == identifierToken or state == numberToken or state == lesserToken or state == greaterToken:
-
-        if (character == '\n'):
-            line -= 1
-
-        character = inputFile.seek(inputFile.tell()-1,0)  #epistrefei to teleutaio char pou diabase sto File (px avd+)
-        tokenString = tokenString[:-1]  
-
-
-
-    #print('tokenString:', tokenString)
-    
-
-    # TODO function for identifier tokens
-    if state == identifierToken:
+    # identifyToken() matches the tokenString with one of the keywords of cimple
+    def identifyToken():
 
         if tokenString in keywords:
 
             if tokenString == keywords[0]:
                 state = programToken
 
-            if tokenString == keywords[1]:
+            elif tokenString == keywords[1]:
                 state = declareToken
 
-            if tokenString == keywords[2]:
+            elif tokenString == keywords[2]:
                 state = ifToken
             
-            if tokenString == keywords[3]:
+            elif tokenString == keywords[3]:
                 state = elseToken
 
-            if tokenString == keywords[4]:
+            elif tokenString == keywords[4]:
                 state = whileToken
 
-            if tokenString == keywords[5]:
+            elif tokenString == keywords[5]:
                 state = switchcaseToken
 
-            if tokenString == keywords[6]:
+            elif tokenString == keywords[6]:
                 state = forcaseToken
 
-            if tokenString == keywords[7]:
+            elif tokenString == keywords[7]:
                 state = incaseToken
 
-            if tokenString == keywords[8]:
+            elif tokenString == keywords[8]:
                 state = caseToken
 
-            if tokenString == keywords[9]:
+            elif tokenString == keywords[9]:
                 state = defaultToken
 
-            if tokenString == keywords[10]:
+            elif tokenString == keywords[10]:
                 state = notToken
 
-            if tokenString == keywords[11]:
+            elif tokenString == keywords[11]:
                 state = andToken
 
-            if tokenString == keywords[12]:
+            elif tokenString == keywords[12]:
                 state = orToken
 
-            if tokenString == keywords[13]:
+            elif tokenString == keywords[13]:
                 state = functionToken
             
-            if tokenString == keywords[14]:
+            elif tokenString == keywords[14]:
                 state = procedureToken
 
-            if tokenString == keywords[15]:
+            elif tokenString == keywords[15]:
                 state = callToken
 
-            if tokenString == keywords[16]:
+            elif tokenString == keywords[16]:
                 state = returnToken
 
-            if tokenString == keywords[17]:
+            elif tokenString == keywords[17]:
                 state = inToken
 
-            if tokenString == keywords[18]:
+            elif tokenString == keywords[18]:
                 state = inoutToken
 
-            if tokenString ==  keywords[19]:
+            elif tokenString ==  keywords[19]:
                 state = inputToken
 
-            if tokenString == keywords[20]:
+            elif tokenString == keywords[20]:
                 state = printToken
+        
+        else:
+            state = identifierToken 
+        
+        return state
 
-    #print(tokenString in keywords)
+    # errorCheck() checks for errors and prints the corresponding message along with the line found
+    def errorCheck():
 
-    #print('state:', state)
+        if state == Invalid_Symbol_Error_Code:
+            print('Invalid_Symbol_Error @ Line:', line)
 
+        elif state == Not_An_Integer_Error_Code:
+            print('Not_An_Integer_Error @ Line:', line)
 
-    if state == Invalid_Symbol_Error_Code:
-        print('Invalid_Symbol_Error @ Line:', line)
+        elif state == Assignment_Error_Code:
+            print('Assignment_Error @ Line:', line)
 
-    elif state == Not_An_Integer_Error_Code:
-        print('Not_An_Integer_Error @ Line:', line)
+        elif state == Comment_EOF_Error_Code:
+            print('Comment_EOF_Error @ Line:', line)
 
-    elif state == Assignment_Error_Code:
-        print('Assignment_Error @ Line:', line)
-
-    elif state == Comment_EOF_Error_Code:
-        print('Comment_EOF_Error @ Line:', line)
-
-    elif len(tokenString) > 30:
-        print('Identifier_Too_Long_Error @ Line', line)
-    
-    elif state == numberToken and abs(int(tokenString)) > pow(2,32) - 1:
-        print('Int_Out_Of_Bounds_Error @ Line', line)
+        elif len(tokenString) > 30:
+            print('Identifier_Too_Long_Error @ Line', line)
+        
+        elif state == numberToken and abs(int(tokenString)) > pow(2,32) - 1:
+            print('Int_Out_Of_Bounds_Error @ Line', line)
 
 
+    while state >=0 and state <= 6:
+        
+        character = inputFile.read(1)       # read next character        
+        token = findCharacterToken()        # find the token it belongs to
+        state = lexTable[state][token]      # move to the next state based on the lexTable using the current state and the token found
+
+        if state != startState and state != remState:
+            tokenString += character        # form the string of the token
+
+
+    # if an extra character has been read
+    if state == identifierToken or state == numberToken or state == lesserToken or state == greaterToken:
+
+        if (character == '\n'):
+            line -= 1
+        
+        position = inputFile.tell()         # find the current position in inputFile
+        inputFile.seek(position-1, 0)       # move back by 1 position
+        tokenString = tokenString[:-1]      # remove the last character in tokenString
+
+    # match the token with a cimple keyword
+    if state == identifierToken:
+        state = identifyToken()
+
+    # check for errors with the token
+    errorCheck()
+
+    # finally create the token object to be returned
     token = Token(state, tokenString, line)
-
     return token
 
 
-
-#newToken = lex()
-
-#print(line)
-
-
-while(True):
-
-    token = lex()
-
-    if (token.tokenType == EOFToken):
-        break
-
-    print(token.tokenType, token.tokenString, token.lineNo)
-
-
-
+# syn() is the main function that implements all the syntax rules of cimple
+# using a nested function for each different syntax rule
 def syn():
 
-    # TODO
 
-    return 0
+    # "program" is the starting symbol
+    # program : program ID block .
+    def program():
+
+        global token
+        token = lex()
+
+        if token.tokenType == programToken:
+            token = lex()
+
+            if token.tokenType == identifierToken:
+                token = lex()
+                block()
+
+                if token.tokenType == dotToken:
+                    print('Syntax analysis successful.')
+
+                else:
+                    print('Dot_Not_Found_Error @ Line:', token.lineNo)
+
+            else:
+                print('Missing_Program_Name_Error @ Line:', token.lineNo)
+
+        else:
+            print('Program_Keyword_Not_Found_Error @ Line:', token.lineNo)
+
+
+    # a block with declarations, subprogram and statements
+    # block : declarations subprograms statements
+    def block():
+
+        global token
+
+        declarations()
+        subprograms()
+        statements()
+
+
+    # declaration of variables , zero or more "declare" allowed
+    # declarations : ( declare varlist ; )∗
+    def declarations():
+
+        global token
+
+        while token.tokenType == declareToken:
+
+            token = lex()
+            
+            varlist()
+            
+            if token.tokenType == semicolonToken:
+                token = lex()
+                
+            else:
+                print('Semicolon_Not_Found_Error @ Line:', token.lineNo)
+
+
+    # a list of variables following the declaration keyword
+    # varlist : ID ( , ID )∗
+    # | ε
+    def varlist():
+
+        global token
+
+        if token.tokenType == identifierToken:
+            token = lex()
+        
+            while token.tokenType == commaToken:
+
+                token = lex()
+                
+                if token.tokenType == identifierToken:
+                    token = lex()
+                    
+                else:
+                    print('Variable_Not_Found_Error @ Line:', token.lineNo)
+
+
+    # zero or more subprograms allowed
+    # subprograms : ( subprogram )∗
+    def subprograms():
+
+        global token
+        
+        while token.tokenType == functionToken or token.tokenType == procedureToken:
+
+            subprogram()
+
+
+    # a subprogram is a function or a procedure,
+    # followed by parameters and block
+    # subprogram : function ID ( formalparlist ) block
+    # | procedure ID ( formalparlist ) block
+    def subprogram():
+
+        global token
+
+        if token.tokenType == functionToken:
+            token = lex()
+            
+            if token.tokenType == identifierToken:
+                token = lex()
+                
+                if token.tokenType == leftParenthesisToken:
+                    token = lex()
+                    formalparlist()
+                    
+                    if token.tokenType == rightParenthesisToken:
+                        token = lex()
+                        block()
+
+                    else:
+                        print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+
+                else:
+                    print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+                    
+            else :
+                print('Missing_Function_Name_Error @ Line:', token.lineNo)
+        
+        elif token.tokenType == procedureToken:
+            token = lex()
+            
+            if token.tokenType == identifierToken:
+                token = lex()
+
+                if token.tokenType == leftParenthesisToken:
+                    token = lex()
+                    formalparlist()
+
+                    if token.tokenType == rightParenthesisToken:
+                        token = lex()
+                        block()
+
+                    else:
+                        print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+                    
+                else:
+                    print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+                    
+            else :
+                print('Missing_Procedure_Name_Error @ Line:', token.lineNo)
+            
+
+    # list of formal parameters
+    # formalparlist : for
+    def formalparlist():
+
+        global token
+
+        formalparitem()
+
+        while token.tokenType == commaToken:
+            formalparitem()
+
+
+    # a formal parameter (" in ": by value , " inout " by reference )
+    # formalparitem : in ID
+    #| inout ID
+    def formalparitem():
+
+        global token
+
+        if token.tokenType == inToken:
+            token = lex()
+
+            if token.tokenType == identifierToken:
+                token =lex()
+
+            else:
+                print('Variable_Not_Found_Error @ Line:', token.lineNo)
+
+        elif token.tokenType == inoutToken:
+            token = lex()
+
+            if token.tokenType == identifierToken:
+                token = lex()
+
+    # one or more statements
+    #statements : statement ;
+    # | { statement ( ; statement )∗ }
+    def statements():
+
+        global token
+        
+        if token.tokenType == leftCurlyBracketToken:  
+            token = lex() 
+            statement()
+            
+            while token.tokenType == semicolonToken:
+
+                token = lex()
+                statement()
+
+            if token.tokenType == rightCurlyBracketToken:
+                token = lex()
+            
+            else:
+                print('Right_Curly_Bracket_Not_Found_Error @ Line', token.lineNo)              
+
+        else:
+
+            statement()
+
+            if token.tokenType == semicolonToken:
+                token = lex()
+
+            else:
+                print('Semicolon_Not_Found_Error @ Line:', token.lineNo)
+
+
+    # one statement
+    #statement : assignStat
+    # | ifStat
+    # | whileStat
+    # | switchcaseStat
+    # | forcaseStat
+    # | incaseStat
+    # | callStat
+    # | returnStat
+    # | inputStat
+    # | printStat
+    # | ε
+    def statement():
+        
+        global token
+
+        if token.tokenType == identifierToken:
+            assignStat()
+
+        elif token.tokenType == ifToken:
+            ifStat()
+        
+        elif token.tokenType == whileToken:            
+            whileStat()
+        
+        elif token.tokenType == switchcaseToken:
+            switchcaseStat()
+        
+        elif token.tokenType == forcaseToken:
+            forcaseStat()
+
+        elif token.tokenType == incaseToken:
+            incaseStat()
+
+        elif token.tokenType == callToken:
+            callStat()
+
+        elif token.tokenType == returnToken:
+            returnStat()
+        
+        elif token.tokenType == inputToken:
+            inputStat()
+
+        elif token.tokenType == printToken:
+            printStat()
+
+
+    # assignment statement
+    # assignStat : ID := expression
+    def assignStat():
+        
+        global token
+
+        if token.tokenType == identifierToken:
+            token = lex()
+
+            if token.tokenType == assignmentToken:
+                token = lex()
+                expression()
+
+            else:
+                print('Assignment_Symbol_Not_Found_Error @ Line:', token.lineNo)
+
+        else:
+            print('Variable_Not_Found_Error @ Line:', token.lineNo)      
+
+
+    # if statement
+    # ifStat : if ( condition ) statements elsepart
+    def ifStat():
+
+        global token
+        
+        token = lex()
+
+        if token.tokenType == leftParenthesisToken:
+            token = lex()
+            condition()
+
+            if token.tokenType == rightParenthesisToken:
+                token = lex()
+                statements()
+                elsepart()
+            
+            else:
+                print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+
+        else:
+            print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+            
+    # boolean expression
+    # condition : boolterm ( or boolterm )∗
+    def condition():
+
+        global token
+
+        boolterm()
+
+        while token.tokenType == orToken:
+            token = lex()
+            boolterm()
+
+
+    def elsepart():
+
+        global token
+
+        if token.tokenType == elseToken:
+            token = lex()
+            statements()
+
+
+    # term in boolean expression
+    #boolterm : boolfactor ( and boolfactor )∗
+    def boolterm():
+
+        global token
+
+        boolfactor()
+
+        while token.tokenType == andToken:
+            token = lex()
+            boolfactor()
+
+
+    # factor in boolean expression
+    # boolfactor : not [ condition ]
+    # | [ condition ]
+    # | expression REL_OP expression
+    def boolfactor():
+        
+        global token
+
+        if token.tokenType == notToken:
+            token = lex()
+
+            if token.tokenType == leftSquareBracketToken:
+                token = lex()
+                condition()
+
+                if token.tokenType == rightSquareBracketToken:
+                    token = lex()
+                
+                else:
+                    print('Right_Square_Bracket_Not_Found_Error @ Line:', token.lineNo)
+
+            else:
+                print('Left_Square_Bracket_Not_Found_Error @ Line:', token.lineNo)
+
+        elif token.tokenType == leftSquareBracketToken:
+            token = lex()
+            condition()
+
+            if token.tokenType == rightSquareBracketToken:
+                token = lex()
+                
+            else:
+                print('Right_Square_Bracket_Not_Found_Error @ Line:', token.lineNo)
+
+        else:
+            expression()
+            REL_OP()
+            expression()
+
+
+    # while statement
+    # whileStat : while ( condition ) statements
+    def whileStat():
+
+        global token
+
+        token = lex()
+
+        if token.tokenType == leftParenthesisToken:
+            token = lex()
+            condition()
+
+            if token.tokenType == rightParenthesisToken:
+                token = lex()
+                statements()
+
+            else:
+                print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+                
+        else:
+            print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+
+
+    # switch statement
+    # switchcaseStat: switchcase
+    # ( case ( condition ) statements )∗
+    # default statements
+    def switchcaseStat():
+
+        global token
+
+        token = lex()
+        
+        while token.tokenType == caseToken:
+
+            token = lex()
+
+            if token.tokenType == leftParenthesisToken:
+                token = lex()
+                condition()
+
+                if token.tokenType == rightParenthesisToken:
+                    token = lex()
+                    statements()
+
+                else:
+                    print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+
+            else:
+                print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+                
+        if token.tokenType == defaultToken:
+            token = lex()
+            statements()
+
+        else:
+            print('Forcase_Default_Missing_Error @ Line:', token.lineNo)
+
+
+    # forcase statement
+    # forcaseStat : forcase
+    # ( case ( condition ) statements )∗
+    # default statements
+    def forcaseStat():
+
+        global token
+
+        token = lex()
+
+        while token.tokenType == caseToken:
+
+            token = lex()
+
+            if token.tokenType == leftParenthesisToken:
+                token = lex()
+                condition()
+
+                if token.tokenType == rightParenthesisToken:
+                    token = lex()
+                    statements()
+
+                else:
+                    print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+                
+            else:
+                print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+                
+        if token.tokenType == defaultToken:
+            token = lex()
+            statements()
+
+        else:
+            print('Forcase_Default_Missing_Error @ Line:', token.lineNo) 
+
+
+    # incase statement
+    # incaseStat : incase
+    # ( case ( condition ) statements )∗
+    def incaseStat():
+
+        global token
+        
+        token = lex()
+
+        while token.tokenType == caseToken:
+            token = lex()
+
+            if token.tokenType == leftParenthesisToken:
+                token = lex()
+                condition()
+
+                if token.tokenType == rightParenthesisToken:
+                    token= lex()
+                    statements()
+                
+                else:
+                    print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+
+            else:
+                print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+                
+
+    # return statement
+    # returnStat : return( expression )
+    def returnStat():
+
+        global token
+
+        token = lex()
+
+        if token.tokenType == leftParenthesisToken:
+            token = lex()
+            expression()
+
+            if token.tokenType == rightParenthesisToken:
+                token = lex()
+
+            else:
+                print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+        
+        else:
+            print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+            
+
+    # call statement
+    # callStat : call ID( actualparlist )
+    def callStat():
+
+        global token
+
+        token = lex()
+        
+        if token.tokenType == identifierToken:
+            token = lex()
+            
+            if token.tokenType == leftParenthesisToken:
+                token = lex()
+                actualparlist()
+
+                if token.tokenType == rightParenthesisToken:
+                    token = lex()
+                
+                else:
+                    print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+           
+            else:
+                print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+                
+        else:
+            print('Missing_Call_Identifier_Error @ Line:', token.lineNo)
+
+
+    # print statement
+    # printStat : print( expression ) 
+    def printStat():
+
+        global token
+
+        token = lex()
+        
+        if token.tokenType == leftParenthesisToken:
+            token = lex()
+            expression()
+
+            if token.tokenType == rightParenthesisToken:
+                token = lex()
+
+            else:
+                print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+        
+        else:
+            print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+            
+    
+    # input statement
+    # inputStat : input( ID )
+    def inputStat():
+
+        global token
+
+        token = lex()
+
+        if token.tokenType == leftParenthesisToken:
+            token = lex()
+
+            if token.tokenType == identifierToken:
+                token = lex()
+
+                if token.tokenType == rightParenthesisToken:
+                    token = lex()
+                
+                else:
+                    print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+            
+            else:
+                print('Input_Identifier_Not_Found_Error @ Line:', token.lineNo)
+
+        else:
+            print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+            
+
+    # list of actual parameters
+    #ctualparlist : actualparitem ( , actualparitem )∗
+    # | ε
+    def actualparlist():
+
+        global token
+
+        actualparitem()
+
+        while token.tokenType == commaToken:
+            token = lex()
+            actualparitem()
+
+
+    # an actual parameter (" in ": by value , " inout " by reference )
+    # actualparitem : in expression
+    # | inout ID
+    def actualparitem():
+
+        global token
+
+        if token.tokenType == inToken:
+            token = lex()
+            expression()
+            
+        elif token.tokenType == inoutToken:
+            token = lex()
+            
+            if token.tokenType == identifierToken:
+                token = lex()
+
+            else:
+                print('Variable_Name_Not_Found_Error @ Line:', token.lineNo)
+
+
+    # boolean expression
+    # condition : boolterm ( or boolterm )
+    def condition():
+
+        global token
+
+        boolterm()
+
+        while token.tokenType == orToken:
+            
+            token = lex()
+            boolterm()
+
+
+    # arithmetic expression
+    # expression : optionalSign term ( ADD_OP term )∗
+    def expression():
+
+        global token
+
+        optionalSign()
+        term()
+
+        while token.tokenType == plusToken or token.tokenType == minusToken:
+            ADD_OP()
+            term()
+
+    # term in arithmetic expression
+    # term : factor ( MUL_OP factor )∗ 
+    def term():
+
+        global token
+
+        factor()
+
+        while token.tokenType == mulToken or token.tokenType == divToken:
+
+            #token = lex()
+            MUL_OP()
+            factor()
+
+
+    # MUL_OP : * | /
+    def MUL_OP():
+
+        global token
+        
+        if token.tokenType == mulToken:
+            token = lex()
+
+        elif token.tokenType == divToken:
+            token = lex()
+
+
+    # factor in arithmetic expression
+    # factor : INTEGER
+    # | ( expression )
+    # | ID idtail
+    def factor():
+
+        global token
+
+        if token.tokenType == numberToken:
+            token = lex()
+
+        elif token.tokenType == leftParenthesisToken:
+            token = lex()
+            expression()
+
+            if token.tokenType == rightParenthesisToken:
+                token = lex()
+            
+            else:
+                print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
+
+        elif token.tokenType == identifierToken:
+            token = lex()
+            idtail()
+
+        else:
+            print ('Missing_Expression_Error @ Line:', token.lineNo)
+
+
+    # follows a function of procedure ( parethnesis and parameters )
+    # idtail : ( actualparlist )
+    # | ε
+    def idtail():
+
+        global token
+        
+        if token.tokenType == leftParenthesisToken:
+            token = lex()
+            actualparlist()
+
+            if token.tokenType == rightParenthesisToken:
+                token = lex()
+
+
+    # sumbols "+" and " -" ( are optional )
+    # optionalSign : ADD_OP
+    # | ε
+    def optionalSign():
+
+        global token
+
+        if token.tokenType == plusToken or token.tokenType == minusToken:
+            #token = lex()
+            ADD_OP()
+
+
+    # ADD_OP : + | -
+    def ADD_OP():
+
+        global token
+
+        if token.tokenType == plusToken:
+            token = lex()
+
+        elif token.tokenType == minusToken:
+            token = lex()
+
+
+    # lexer rules : relational , arithentic operations , integers and ids
+    # REL_OP : = | <= | >= | > | < | <>
+    def REL_OP():
+
+        global token
+
+        if token.tokenType == equalToken:
+            token = lex()
+
+        elif token.tokenType == lesserOrEqualToken:
+            token = lex()
+
+        elif token.tokenType ==  greaterOrEqualToken:
+            token = lex()
+
+        elif token.tokenType == greaterToken:
+            token = lex()
+
+        elif token.tokenType == lesserToken:
+            token = lex()
+
+        elif token.tokenType == notEqualToken:
+            token = lex()
+
+        else:
+            print ('Missing_Relational_Operator_Error @ Line:', token.lineNo)
+
+
+    program()
+
+
+inputFile = open(sys.argv[1])   # open the file given as arg
+
+global line
+line = 1                        # start the line counter
+
+syn()                           # start syntax analysis
