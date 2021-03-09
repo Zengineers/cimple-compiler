@@ -1,0 +1,26 @@
+program ProgramName2
+
+    # d e c l a r 
+    a t i o n s #
+
+    declare A;
+    declare x, y ,k;
+
+    function xxx(in A)
+
+    {
+        x := 5; 
+        y :=  A + 3;
+        return (y);
+    }
+
+    {
+        forcase
+            case (k>20) k:=k-50;
+            case (k>10) k:=k*2;
+            default k:=0;
+	      ;
+    
+        input(A);
+        print(A);
+    }.

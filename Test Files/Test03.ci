@@ -1,0 +1,51 @@
+program GandalfTheGrey
+
+    declare x1, x2, x3;
+
+    function calculatorABC(inout X)
+    
+        declare i;
+    {
+        input(i);
+
+        while (i <= 10)
+        {
+            X := x1 - 1;
+            x2 := x2 + 3;
+            i := i + 1;
+
+            print(i);
+            #print([x1 <> x2]);#
+        }
+    }
+
+    
+
+    # you
+        shall
+            not
+                pass #
+    
+    {
+        input(x1);
+        input(x2);
+
+        # ERROR HERE #
+        
+        switchcase
+            case (x1>x2) x1 := x2;
+		    case (x1<x2) x2 := x1 + x2;
+		    case (x1>555) x1 := x1 / 555;
+            case (x2<=678) x1 := 0;
+		    default input(x1);
+	    ;
+
+        call calculatorABC(in x1, inout x2);
+        
+        while ([x1 < 0] or [x2 = 1])
+        {
+            x1 := x1 + 10;
+            input(x2);
+        }
+        
+    }.

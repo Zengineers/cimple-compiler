@@ -1,0 +1,43 @@
+program TestProgram01
+
+    declare var01, var02, var03, var04;
+    declare a,b,c,d,e;
+
+    procedure testProcedure01()
+
+        declare p1, p2;
+
+    {
+        p1 := a;
+        p2 := b;
+        var01 := p1 + p2;
+
+        if (not[var01 >= var02] and var04 <> var03) {
+            var03 := var03 - var04;
+            print(var03);
+        }
+        else {
+            print(var01);
+        }
+    }
+
+    ### main program ###
+
+	{
+        input(a);
+        input(b);
+        input(c);
+
+        d := 12387;
+        e := 6262;
+
+        while ([d > 0] and [e > -1])
+        {
+            a := b + 1;
+            c := a * 2;
+
+            call testProcedure01();
+        }
+
+
+    }.
