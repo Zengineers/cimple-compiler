@@ -3,9 +3,15 @@
 
 
 import sys
-
+import time
 
 #region Variable Assignments
+
+# start the line, quad and temp variable counters
+line = 1
+quadCount = 1
+tempCount = 0
+
 
 # States
 startState = 0
@@ -17,7 +23,7 @@ largerState = 5
 remState = 6
 
 
-# Errors
+# Lex Errors
 Invalid_Symbol_Error_Code = -1
 Not_An_Integer_Error_Code = -2
 Assignment_Error_Code = -3
@@ -107,6 +113,12 @@ hashtagToken = 69
 
 #region Tables
 
+# tables for the intermediate code quads and temp variables and for the variables of the cimple program
+quadsTable = []
+tempTable = []
+varTable = []
+
+
 lexTable = [ 
                                   
     # start state
@@ -174,6 +186,200 @@ class Token:
         self.tokenType = tokenType
         self.tokenString = tokenString
         self.lineNo = lineNo
+
+
+# quad class containing the info of a quad
+class Quad:
+
+    def __init__(self, counter, operation, x, y, z):
+        self.counter = counter
+        self.operation = operation
+        self.x = x
+        self.y = y
+        self.z = z
+
+
+# class containing all the functions that assist with the intermediate code generation
+class interCode:
+
+    # returns the number of the next quad
+    @staticmethod
+    def nextQuad():
+        
+        global quadCount
+
+        #quadCount += 1
+
+        return quadCount
+
+
+    # creates the next quad
+    @staticmethod
+    def genQuad(op, x, y, z):
+
+        global quadsTable, quadCount
+
+        counter = interCode.nextQuad()
+        quad = Quad(counter, op, x, y, z)
+
+        quadsTable.append(quad)
+        quadCount += 1
+
+        return quad
+
+
+    # creates and returns a new temp variable
+    @staticmethod
+    def newTemp():
+
+        global tempCount
+        global tempTable
+
+        temp = 'T_'
+        tempCount += 1
+        temp = temp + str(tempCount)
+
+        tempTable += [temp]
+
+        return temp
+
+
+    # creates an empty list of quads
+    @staticmethod
+    def emptyList():
+
+        empty = []
+
+        return empty
+
+
+    # creates a list of quad tags
+    @staticmethod
+    def makeList(x):
+        
+        make = [x]
+
+        return make
+
+
+    # creates a list of quad tags of the merge of list1 and list2
+    @staticmethod
+    def merge(list1, list2):
+
+        merge = []
+        merge += list1 + list2
+
+        return merge
+
+
+    # fills the last field the quads list points to with z
+    @staticmethod
+    def backpatch(list, z):
+        
+        global quadsTable
+
+        for i in range(len(list)):
+
+            for j in range(len(quadsTable)):
+
+                if list[i] == quadsTable[j].counter and quadsTable[j].z == '_':
+                    quadsTable[j].z = z
+                    break
+
+
+    # outputs the table that contains the intermediate code quads to a .int file
+    @staticmethod
+    def outputFile():
+
+        global quadsTable
+
+        F = open('interCode.int', 'w+')
+
+        for i in range(len(quadsTable)):
+            F.write(str(quadsTable[i].counter) + ' ' + str(quadsTable[i].operation) + ' ' + str(quadsTable[i].x) + ' ' + str(quadsTable[i].y) + ' ' + str(quadsTable[i].z) + '\n')
+       
+    
+    # outputs the intermediate code quads as assembly-like C code - only works if the cimple program does not have any subprograms
+    @staticmethod
+    def outputFileC():
+        
+        global quadsTable, tempTable, varTable
+
+        # check if the input cimple program contains a subprogram
+        for i in range(1, len(quadsTable)):
+            if quadsTable[i].operation == 'begin_block': print('Subprogram detected - C code will not be generated.'); return
+            
+        F = open('interCode.c', 'w+')
+
+        F.write('#include <stdio.h>\n\n\nint main()\n{\n\t')
+
+        
+        # declare temp variables
+        if len(tempTable) > 0:
+            F.write('int ')
+
+            for i in range(len(tempTable)):
+                F.write(tempTable[i])
+
+                if i+1 == len(tempTable):
+                    F.write(';\n\t')
+
+                else:
+                    F.write(', ')
+
+
+        # declare variables
+        if len(varTable) > 0:
+            F.write('int ')
+
+            for i in range(len(varTable)):
+                F.write(varTable[i])
+
+                if i+1 == len(varTable):
+                    F.write(';\n\t')
+
+                else:
+                    F.write(', ')
+
+
+        # convert the intermediate code quads to assembly-like C code
+        for i in range(len(quadsTable)):
+
+            if quadsTable[i].operation == 'begin_block':
+                F.write('\n\tL_' + str(i+1) + ':')
+
+            elif quadsTable[i].operation ==  ':=':
+                F.write('\n\tL_' + str(i+1) + ':  ' + quadsTable[i].z + ' = ' + quadsTable[i].x + ';')
+
+            elif quadsTable[i].operation == '+' or quadsTable[i].operation == '-' or quadsTable[i].operation == '*' or quadsTable[i].operation == '/':
+                F.write('\n\tL_' + str(i+1) + ':  ' + quadsTable[i].z + ' = ' + quadsTable[i].x + ' ' + quadsTable[i].operation + ' ' + quadsTable[i].y + ';')
+
+            elif quadsTable[i].operation == '<' or quadsTable[i].operation == '>' or quadsTable[i].operation == '<=' or quadsTable[i].operation == '>=':\
+                F.write('\n\tL_' + str(i+1) + ':  if (' + str(quadsTable[i].x) + ' ' + str(quadsTable[i].operation) + ' ' + str(quadsTable[i].y) + ') goto L_' + str(quadsTable[i].z) + ';')
+
+            elif quadsTable[i].operation == 'jump':
+                F.write('\n\tL_' + str(i+1) + ':  goto L_' + str(quadsTable[i].z) + ';')
+
+            elif quadsTable[i].operation == '=':
+                F.write('\n\tL_' + str(i+1) + ':  if (' + str(quadsTable[i].x) + ' == ' + str(quadsTable[i].y) + ') goto L_' + str(quadsTable[i].z) + ';')
+
+            elif quadsTable[i].operation == '<>':
+                F.write('\n\tL_' + str(i+1) + ':  if (' + str(quadsTable[i].x) + ' != ' + str(quadsTable[i].y) + ') goto L_' + str(quadsTable[i].z) + ';')
+
+            elif quadsTable[i].operation == 'inp':
+                F.write('\n\tL_' + str(i+1) + ':  scanf("%d", &' + str(quadsTable[i].x + ');'))
+                
+            elif quadsTable[i].operation == 'out':
+                F.write('\n\tL_' + str(i+1) + ':  printf("' + str(quadsTable[i].x) + ': %d\\n", ' + str(quadsTable[i].x + ');'))
+
+            elif quadsTable[i].operation == 'halt':
+                F.write('\n\tL_' + str(i+1) + ':  {}')
+
+            elif quadsTable[i].operation == 'end_block':
+                F.write('\n}')
+
+            # write the quads as comments
+            F.write('\t\t// (' + str(quadsTable[i].operation) + ', ' + str(quadsTable[i].x) + ', ' + str(quadsTable[i].y) + ', ' + str(quadsTable[i].z) + ')')
 
 
 # lex() reads the characters of the input file and finds the next token
@@ -397,12 +603,14 @@ def lex():
 
 # syn() is the main function that implements all the syntax rules of cimple
 # using a nested function for each different syntax rule
+# in case of error the corresponding message is printed along with the line where it occured
 def syn():
 
 
     # "program" is the starting symbol
-    # program : program ID block .
     def program():
+
+        # program : program ID block .
 
         global token
         token = lex()
@@ -411,8 +619,10 @@ def syn():
             token = lex()
 
             if token.tokenType == identifierToken:
+                programIdentifier = token.tokenString
                 token = lex()
-                block()
+
+                block(programIdentifier, True)
 
                 if token.tokenType == dotToken:
                     print('Syntax analysis successful.')
@@ -427,20 +637,26 @@ def syn():
             print('Program_Keyword_Not_Found_Error @ Line:', token.lineNo)
 
 
-    # a block with declarations, subprogram and statements
-    # block : declarations subprograms statements
-    def block():
+    # a block with declarations, subprogram and statements   
+    def block(identifier, isProgram):
+
+        # block : declarations subprograms statements
 
         global token
 
         declarations()
         subprograms()
+
+        interCode.genQuad('begin_block', identifier, '_', '_')
         statements()
+        if isProgram: interCode.genQuad('halt', '_', '_', '_')
+        interCode.genQuad('end_block', identifier, '_', '_')
 
 
     # declaration of variables , zero or more "declare" allowed
-    # declarations : ( declare varlist ; )∗
     def declarations():
+
+        # declarations : ( declare varlist ; )∗
 
         global token
 
@@ -458,20 +674,23 @@ def syn():
 
 
     # a list of variables following the declaration keyword
-    # varlist : ID ( , ID )∗
-    # | ε
     def varlist():
 
-        global token
+        # varlist : ID ( , ID )∗
+        # | ε
+
+        global token, varTable
 
         if token.tokenType == identifierToken:
+            varTable.append(token.tokenString)      # store variable for later use in outputFileC()
             token = lex()
-        
+
             while token.tokenType == commaToken:
 
                 token = lex()
                 
                 if token.tokenType == identifierToken:
+                    varTable.append(token.tokenString)      # store variables for later use in outputFileC()
                     token = lex()
                     
                 else:
@@ -479,8 +698,9 @@ def syn():
 
 
     # zero or more subprograms allowed
-    # subprograms : ( subprogram )∗
     def subprograms():
+
+        # subprograms : ( subprogram )*
 
         global token
         
@@ -489,11 +709,12 @@ def syn():
             subprogram()
 
 
-    # a subprogram is a function or a procedure,
-    # followed by parameters and block
-    # subprogram : function ID ( formalparlist ) block
-    # | procedure ID ( formalparlist ) block
+    # a subprogram is a function or a procedure
     def subprogram():
+
+        # followed by parameters and block
+        # subprogram : function ID ( formalparlist ) block
+        # | procedure ID ( formalparlist ) block
 
         global token
 
@@ -501,6 +722,7 @@ def syn():
             token = lex()
             
             if token.tokenType == identifierToken:
+                functionIdentifier = token.tokenString
                 token = lex()
                 
                 if token.tokenType == leftParenthesisToken:
@@ -509,7 +731,7 @@ def syn():
                     
                     if token.tokenType == rightParenthesisToken:
                         token = lex()
-                        block()
+                        block(functionIdentifier, False)
 
                     else:
                         print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
@@ -524,6 +746,7 @@ def syn():
             token = lex()
             
             if token.tokenType == identifierToken:
+                procedureIdentifier = token.tokenString
                 token = lex()
 
                 if token.tokenType == leftParenthesisToken:
@@ -532,7 +755,7 @@ def syn():
 
                     if token.tokenType == rightParenthesisToken:
                         token = lex()
-                        block()
+                        block(procedureIdentifier, False)
 
                     else:
                         print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
@@ -545,21 +768,26 @@ def syn():
             
 
     # list of formal parameters
-    # formalparlist : for
     def formalparlist():
+
+        # formalparlist : formalparitem ( , formalparitem )∗
+        # | ε
 
         global token
 
         formalparitem()
 
         while token.tokenType == commaToken:
+
+            token = lex()
             formalparitem()
 
 
     # a formal parameter (" in ": by value , " inout " by reference )
-    # formalparitem : in ID
-    #| inout ID
     def formalparitem():
+
+        # formalparitem : in ID
+        # | inout ID
 
         global token
 
@@ -578,10 +806,15 @@ def syn():
             if token.tokenType == identifierToken:
                 token = lex()
 
+            else:
+                print('Variable_Not_Found_Error @ Line:', token.lineNo)
+
+
     # one or more statements
-    #statements : statement ;
-    # | { statement ( ; statement )∗ }
     def statements():
+
+        #statements : statement ;
+        # | { statement ( ; statement )∗ }
 
         global token
         
@@ -598,7 +831,7 @@ def syn():
                 token = lex()
             
             else:
-                print('Right_Curly_Bracket_Not_Found_Error @ Line', token.lineNo)              
+                print('Right_Curly_Bracket_Not_Found_Error @ Line', token.lineNo)       
 
         else:
 
@@ -612,18 +845,19 @@ def syn():
 
 
     # one statement
-    #statement : assignStat
-    # | ifStat
-    # | whileStat
-    # | switchcaseStat
-    # | forcaseStat
-    # | incaseStat
-    # | callStat
-    # | returnStat
-    # | inputStat
-    # | printStat
-    # | ε
     def statement():
+        
+        # statement : assignStat
+        # | ifStat
+        # | whileStat
+        # | switchcaseStat
+        # | forcaseStat
+        # | incaseStat
+        # | callStat
+        # | returnStat
+        # | inputStat
+        # | printStat
+        # | ε
         
         global token
 
@@ -659,17 +893,23 @@ def syn():
 
 
     # assignment statement
-    # assignStat : ID := expression
     def assignStat():
+        
+        # assignStat : ID := expression
+        # S -> ID := E {P1}
         
         global token
 
         if token.tokenType == identifierToken:
+            ID = token.tokenString
             token = lex()
 
             if token.tokenType == assignmentToken:
                 token = lex()
-                expression()
+                E = expression()
+                
+                # {P1} - generate a new quad for the assignment
+                interCode.genQuad(':=', E, '_', ID)
 
             else:
                 print('Assignment_Symbol_Not_Found_Error @ Line:', token.lineNo)
@@ -678,9 +918,12 @@ def syn():
             print('Variable_Not_Found_Error @ Line:', token.lineNo)      
 
 
-    # if statement
-    # ifStat : if ( condition ) statements elsepart
+    # if statement 
     def ifStat():
+
+        # ifStat : if ( condition ) statements elsepart
+        # S -> if B then {P1} S1 {P2} TAIL {P3}
+        # TAIL -> else S2 | TAIL -> ε
 
         global token
         
@@ -688,33 +931,67 @@ def syn():
 
         if token.tokenType == leftParenthesisToken:
             token = lex()
-            condition()
+            B = condition()
+
+            # {P1} - fill empty quad
+            interCode.backpatch(B[0], interCode.nextQuad())
 
             if token.tokenType == rightParenthesisToken:
                 token = lex()
                 statements()
+
+                # {P2} - fill empty quad and create a 'jump' quad to ensure that the else code doesn't get executed (if code gets executed)
+                ifList = interCode.makeList(interCode.nextQuad())
+                interCode.genQuad('jump', '_', '_', '_')
+                interCode.backpatch(B[1], interCode.nextQuad())
+
                 elsepart()
+
+                # {P3} - ensure that the else code doesn't get executed (if code gets executed)
+                interCode.backpatch(ifList, interCode.nextQuad())
             
             else:
                 print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
 
         else:
             print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
-            
+
+
     # boolean expression
-    # condition : boolterm ( or boolterm )∗
     def condition():
+
+        # condition : boolterm ( or boolterm )∗
+        # C -> Q1 {P1} (or {P2} Q2 {P3})*
 
         global token
 
-        boolterm()
+        Q1 = boolterm()
+
+        # {P1} - transfer true and false quads from Q1
+        conditionTrue = Q1[0]
+        conditionFalse = Q1[1]
 
         while token.tokenType == orToken:
+
             token = lex()
-            boolterm()
+
+            # {P2} - fill quads that can be filled within the rule
+            interCode.backpatch(conditionFalse, interCode.nextQuad())
+
+            Q2 = boolterm()
+
+            # {P3} - merge the true quads together and transfer the false quad from Q2
+            conditionTrue = interCode.merge(conditionTrue, Q2[0])
+            conditionFalse = Q2[1] 
+
+        return conditionTrue, conditionFalse
 
 
+    # else statement
     def elsepart():
+
+        # elsepart : else statements
+        #| ε
 
         global token
 
@@ -724,61 +1001,102 @@ def syn():
 
 
     # term in boolean expression
-    #boolterm : boolfactor ( and boolfactor )∗
     def boolterm():
+
+        # boolterm : boolfactor ( and boolfactor )∗
+        # Q -> R1{P1} (and {P2} R2 {P3})*
 
         global token
 
-        boolfactor()
+        R1 = boolfactor()
+
+        # {P1} - transfer true and false quads from R1
+        booltermTrue = R1[0]
+        booltermFalse = R1[1]
 
         while token.tokenType == andToken:
+            
             token = lex()
-            boolfactor()
+
+            # {P2} - fill quads that can be filled within the rule
+            interCode.backpatch(booltermTrue, interCode.nextQuad())
+
+            R2 = boolfactor()
+
+            # {P3} - transfer the true quad from R2 and merge the false quads together
+            booltermTrue = R2[0] 
+            booltermFalse = interCode.merge(booltermFalse, R2[1])
+
+        return booltermTrue, booltermFalse
 
 
     # factor in boolean expression
-    # boolfactor : not [ condition ]
-    # | [ condition ]
-    # | expression REL_OP expression
     def boolfactor():
+        
+        # boolfactor : not [ condition ]
+        # | [ condition ]
+        # | expression REL_OP expression
+        
         
         global token
 
+        # R -> not ( B ) {P1}
         if token.tokenType == notToken:
             token = lex()
 
             if token.tokenType == leftSquareBracketToken:
                 token = lex()
-                condition()
+                B = condition()
 
                 if token.tokenType == rightSquareBracketToken:
                     token = lex()
-                
+
+                    # {P1} - transfer true quads as false and false quads as true
+                    boolfactorTrue = B[1]
+                    boolfactorFalse = B[0]
+
                 else:
                     print('Right_Square_Bracket_Not_Found_Error @ Line:', token.lineNo)
 
             else:
                 print('Left_Square_Bracket_Not_Found_Error @ Line:', token.lineNo)
 
+        # R -> ( B ) {P1}
         elif token.tokenType == leftSquareBracketToken:
             token = lex()
-            condition()
+            B = condition()
 
             if token.tokenType == rightSquareBracketToken:
                 token = lex()
+
+                # {P1} - transfer true and false quads from B
+                boolfactorTrue = B[0]
+                boolfactorFalse = B[1]
                 
             else:
                 print('Right_Square_Bracket_Not_Found_Error @ Line:', token.lineNo)
 
+        # R -> E1 relop E2 {P1}
         else:
-            expression()
-            REL_OP()
-            expression()
+
+            E1 = expression()
+            relop = REL_OP()
+            E2 = expression()
+
+            # {P1} - create two empty quads for the true and false evaluation of relop respectively
+            boolfactorTrue = interCode.makeList(interCode.nextQuad())
+            interCode.genQuad(relop, E1, E2, '_')
+            boolfactorFalse = interCode.makeList(interCode.nextQuad())
+            interCode.genQuad('jump', '_', '_', '_')
+
+        return boolfactorTrue, boolfactorFalse
 
 
     # while statement
-    # whileStat : while ( condition ) statements
     def whileStat():
+
+        # whileStat : while ( condition ) statements
+        # S -> while {P1} B do {P2} S1 {P3}
 
         global token
 
@@ -786,11 +1104,22 @@ def syn():
 
         if token.tokenType == leftParenthesisToken:
             token = lex()
-            condition()
+
+            # {P1}
+            Bquad = interCode.nextQuad()
+
+            B = condition()
+
+            # {P2}
+            interCode.backpatch(B[0], interCode.nextQuad())
 
             if token.tokenType == rightParenthesisToken:
                 token = lex()
                 statements()
+
+                # {P3} - jump back to Bquad to evaluate the condition again
+                interCode.genQuad('jump', '_', '_', Bquad)
+                interCode.backpatch(B[1], interCode.nextQuad())
 
             else:
                 print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
@@ -800,14 +1129,18 @@ def syn():
 
 
     # switch statement
-    # switchcaseStat: switchcase
-    # ( case ( condition ) statements )∗
-    # default statements
     def switchcaseStat():
 
+        # switchcaseStat: switchcase
+        # ( case ( condition ) statements )∗
+        # default statements
+        # TODO
+        
         global token
 
         token = lex()
+
+        # {P1}
         
         while token.tokenType == caseToken:
 
@@ -836,14 +1169,19 @@ def syn():
 
 
     # forcase statement
-    # forcaseStat : forcase
-    # ( case ( condition ) statements )∗
-    # default statements
     def forcaseStat():
 
+        # forcaseStat : forcase
+        # ( case ( condition ) statements )∗
+        # default statements
+        # S -> forcase  {P1} (case (condition) {P2} statements {P3})*
+        
         global token
 
         token = lex()
+        
+        # {P1}
+        p1Quad = interCode.nextQuad()
 
         while token.tokenType == caseToken:
 
@@ -851,11 +1189,18 @@ def syn():
 
             if token.tokenType == leftParenthesisToken:
                 token = lex()
-                condition()
+                C = condition()
 
+                # {P2}
+                interCode.backpatch(C[0], interCode.nextQuad())
+                
                 if token.tokenType == rightParenthesisToken:
                     token = lex()
                     statements()
+
+                    # {P3}
+                    interCode.genQuad('jump', '_', '_', p1Quad)
+                    interCode.backpatch(C[1], interCode.nextQuad())
 
                 else:
                     print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
@@ -872,43 +1217,66 @@ def syn():
 
 
     # incase statement
-    # incaseStat : incase
-    # ( case ( condition ) statements )∗
     def incaseStat():
+
+        # incaseStat : incase
+        # ( case ( condition ) statements )∗
+        # S -> incase {P1} ( case ( condition ) {P2}  statements {P3} )∗ {P4}
 
         global token
         
         token = lex()
+
+        # {P1}
+        w = interCode.newTemp()
+        p1Quad = interCode.nextQuad()
+        interCode.genQuad(':=', '1', '_', w)
 
         while token.tokenType == caseToken:
             token = lex()
 
             if token.tokenType == leftParenthesisToken:
                 token = lex()
-                condition()
+                C = condition()
+
+                # {P2}
+                interCode.backpatch(C[0], interCode.nextQuad())
+                interCode.genQuad(':=', '0', '_', w)
+
 
                 if token.tokenType == rightParenthesisToken:
                     token= lex()
                     statements()
-                
+
+                    # {P3}
+                    interCode.backpatch(C[1], interCode.nextQuad())
+
                 else:
                     print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
 
             else:
                 print('Left_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
-                
+
+        # {P4}
+        interCode.genQuad('=', w, '0', p1Quad)  
+
 
     # return statement
-    # returnStat : return( expression )
     def returnStat():
 
+        # returnStat : return( expression )
+        # S -> return (E) {P1}
+    
         global token
 
         token = lex()
 
         if token.tokenType == leftParenthesisToken:
             token = lex()
-            expression()
+            E = expression()
+
+            # {P1} - generate a new quad for the return statement
+            interCode.genQuad('retv', E, '_', '_')
 
             if token.tokenType == rightParenthesisToken:
                 token = lex()
@@ -921,19 +1289,23 @@ def syn():
             
 
     # call statement
-    # callStat : call ID( actualparlist )
     def callStat():
+
+        # callStat : call ID( actualparlist )
 
         global token
 
         token = lex()
         
         if token.tokenType == identifierToken:
+            procedureIdentifier = token.tokenString     # keep the procedure name identifier
             token = lex()
             
             if token.tokenType == leftParenthesisToken:
                 token = lex()
-                actualparlist()
+                actualparlist()     # handle the procedure parameters first
+
+                interCode.genQuad('call', procedureIdentifier, '_', '_')        # generate a new quad for the procedure call
 
                 if token.tokenType == rightParenthesisToken:
                     token = lex()
@@ -949,8 +1321,10 @@ def syn():
 
 
     # print statement
-    # printStat : print( expression ) 
     def printStat():
+
+        # printStat : print( expression ) 
+        # S -> print (E) {P2}
 
         global token
 
@@ -958,10 +1332,13 @@ def syn():
         
         if token.tokenType == leftParenthesisToken:
             token = lex()
-            expression()
+            E = expression()
 
             if token.tokenType == rightParenthesisToken:
                 token = lex()
+
+                # {P2} - generate a new quad for the print statement
+                interCode.genQuad('out', E, '_', '_')
 
             else:
                 print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
@@ -971,8 +1348,10 @@ def syn():
             
     
     # input statement
-    # inputStat : input( ID )
     def inputStat():
+
+        # inputStat : input( ID )
+        # S -> input (ID) {P1}
 
         global token
 
@@ -982,10 +1361,14 @@ def syn():
             token = lex()
 
             if token.tokenType == identifierToken:
+                ID = token.tokenString
                 token = lex()
 
                 if token.tokenType == rightParenthesisToken:
                     token = lex()
+
+                    # {P1} - generate a new quad for the input statement
+                    interCode.genQuad('inp',ID,'_','_')
                 
                 else:
                     print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
@@ -998,9 +1381,10 @@ def syn():
             
 
     # list of actual parameters
-    #ctualparlist : actualparitem ( , actualparitem )∗
-    # | ε
     def actualparlist():
+
+        # actualparlist : actualparitem ( , actualparitem )∗
+        # | ε
 
         global token
 
@@ -1012,66 +1396,82 @@ def syn():
 
 
     # an actual parameter (" in ": by value , " inout " by reference )
-    # actualparitem : in expression
-    # | inout ID
     def actualparitem():
+
+        # actualparitem : in expression
+        # | inout ID
 
         global token
 
         if token.tokenType == inToken:
             token = lex()
-            expression()
+            E = expression()        # get the expression of the parameter
+
+            interCode.genQuad('par', E, 'CV', '_')      # generate a new quad for the parameter (pass by value)
             
         elif token.tokenType == inoutToken:
             token = lex()
             
             if token.tokenType == identifierToken:
+                parameterIdentifier = token.tokenString     # save the parameter identifier string
                 token = lex()
+
+                interCode.genQuad('par', parameterIdentifier, 'REF', '_')       # generate a new quad for the parameter (pass by reference)
 
             else:
                 print('Variable_Name_Not_Found_Error @ Line:', token.lineNo)
 
 
-    # boolean expression
-    # condition : boolterm ( or boolterm )
-    def condition():
-
-        global token
-
-        boolterm()
-
-        while token.tokenType == orToken:
-            
-            token = lex()
-            boolterm()
-
-
     # arithmetic expression
-    # expression : optionalSign term ( ADD_OP term )∗
     def expression():
+
+        # expression : optionalSign term ( ADD_OP term )∗
+        # E -> T1 (+|- T2 {P1})* {P2}
 
         global token
 
         optionalSign()
-        term()
+        T1 = term()
 
         while token.tokenType == plusToken or token.tokenType == minusToken:
-            ADD_OP()
-            term()
+
+            addOperator = ADD_OP()
+            T2 = term()
+
+            # {P1}
+            w = interCode.newTemp()        # create new temp for the current expression result
+            interCode.genQuad(addOperator, T1, T2, w)      # generate new quad for the current expression result
+            T1 = w      # store the current expression result on T1 in case
+        # {P2} - no other T2 so the final expression result is T1
+        E = T1
+
+        return E
+
 
     # term in arithmetic expression
-    # term : factor ( MUL_OP factor )∗ 
     def term():
+
+        # term : factor ( MUL_OP factor )∗ 
+        # T -> F1 (*|/ F2 {P1})* {P2}
 
         global token
 
-        factor()
+        F1 = factor()
 
         while token.tokenType == mulToken or token.tokenType == divToken:
 
-            #token = lex()
-            MUL_OP()
-            factor()
+            mulOperator = MUL_OP()
+            F2 = factor()
+
+            # {P1}
+            w = interCode.newTemp()     # create new temp for the current expression result
+            interCode.genQuad(mulOperator, F1, F2, w)       # generate new quad for the current expression result
+            F1 = w      # store the current expression result on F1 in case there is another F2
+
+        # {P2} - no other F2 so the final expression result is F1
+        T = F1
+        
+        return T
 
 
     # MUL_OP : * | /
@@ -1080,60 +1480,86 @@ def syn():
         global token
         
         if token.tokenType == mulToken:
+            mulOperator = token.tokenString
             token = lex()
 
         elif token.tokenType == divToken:
+            mulOperator = token.tokenString
             token = lex()
+
+        return mulOperator
 
 
     # factor in arithmetic expression
-    # factor : INTEGER
-    # | ( expression )
-    # | ID idtail
     def factor():
 
+        # factor : INTEGER
+        # | ( expression )
+        # | ID idtail
+        # F -> (E) {P1}
+        # F -> ID {P2}
+        
         global token
 
         if token.tokenType == numberToken:
+            F = token.tokenString
             token = lex()
 
         elif token.tokenType == leftParenthesisToken:
             token = lex()
-            expression()
+            E = expression()
 
             if token.tokenType == rightParenthesisToken:
+                # {P1} - transfer from E to F
+                F = E
                 token = lex()
             
             else:
                 print('Right_Parenthesis_Not_Found_Error @ Line:', token.lineNo)
 
         elif token.tokenType == identifierToken:
+            # {P2} - transfer identifier token string to F
+            F = token.tokenString
             token = lex()
-            idtail()
-
+            F = idtail(F)
+            
         else:
             print ('Missing_Expression_Error @ Line:', token.lineNo)
 
+        return F
+
 
     # follows a function of procedure ( parethnesis and parameters )
-    # idtail : ( actualparlist )
-    # | ε
-    def idtail():
+    def idtail(functionIdentifier):
 
+        # idtail : ( actualparlist )
+        # | ε
+        
         global token
         
+        #functionIdentifier = token.tokenString
+
         if token.tokenType == leftParenthesisToken:
             token = lex()
-            actualparlist()
+            actualparlist()     # handle the function parameters first
 
+            w = interCode.newTemp()     # new temp variable
+            interCode.genQuad('par', w, 'RET', '_')     # generate a new quad for the function return value
+            interCode.genQuad('call', functionIdentifier, '_', '_')     # generate a new quad for the function call
+            #functionIdentifier = w
+            
             if token.tokenType == rightParenthesisToken:
                 token = lex()
 
+            return w
+
+        return functionIdentifier
 
     # sumbols "+" and " -" ( are optional )
-    # optionalSign : ADD_OP
-    # | ε
     def optionalSign():
+
+        # optionalSign : ADD_OP
+        # | ε
 
         global token
 
@@ -1148,46 +1574,65 @@ def syn():
         global token
 
         if token.tokenType == plusToken:
+            addOperator = token.tokenString
             token = lex()
 
         elif token.tokenType == minusToken:
+            addOperator = token.tokenString
             token = lex()
+
+        return addOperator
 
 
     # lexer rules : relational , arithentic operations , integers and ids
-    # REL_OP : = | <= | >= | > | < | <>
     def REL_OP():
+
+        # REL_OP := | <= | >= | > | < | <>
 
         global token
 
         if token.tokenType == equalToken:
+            relop = token.tokenString
             token = lex()
 
         elif token.tokenType == lesserOrEqualToken:
+            relop = token.tokenString
             token = lex()
 
         elif token.tokenType ==  greaterOrEqualToken:
+            relop = token.tokenString
             token = lex()
 
         elif token.tokenType == greaterToken:
+            relop = token.tokenString
             token = lex()
 
         elif token.tokenType == lesserToken:
+            relop = token.tokenString
             token = lex()
 
         elif token.tokenType == notEqualToken:
+            relop = token.tokenString
             token = lex()
 
         else:
             print ('Missing_Relational_Operator_Error @ Line:', token.lineNo)
 
+        return relop
+
 
     program()
 
 
+#global quadCount, tempCount, quadsTable, tempTable, varTable, line
+
+
+
+
+
 inputFile = open(sys.argv[1])   # open the file given as arg
 
-global line
-line = 1                        # start the line counter
-
 syn()                           # start syntax analysis
+
+interCode.outputFile()  # output intermediate code quads
+interCode.outputFileC() # convert and output intermediate code quads as C code 
