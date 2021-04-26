@@ -1,0 +1,37 @@
+#   interCode test  #
+#   outputFile() and outputFileC()  #
+#   (no function or procedure)    #
+#   a simple counter program    #
+
+program simplecounter
+
+    declare start, step, finish, counter, error;
+
+    {
+        input(start);
+        input(step);
+        input(finish);
+
+        counter := start;
+        error := -100;
+
+        if ([start >= 0] and [start <= finish] and [step >= 0]) 
+        {
+
+            while (counter < finish)
+            {
+                print(counter);
+                counter := counter + step;
+
+                if (counter = finish)
+                {
+                    print(counter);
+                };
+
+            };
+        }
+        else
+        {
+            print(error);
+        };
+    }.
