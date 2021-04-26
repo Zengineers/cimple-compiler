@@ -1,0 +1,31 @@
+# triangle perimeter and area calculator #
+
+
+program triangle
+
+    declare a, b, c;
+    declare base, height;
+    declare area, perimeter;
+
+    procedure calcPerimeter(inout perimeter, in a, in b, in c)
+    {
+        perimeter := a+b+c;
+    } 
+
+    procedure calcArea(inout area, in base, in height)
+    {
+        area := (base * height) / 2;
+    }
+
+    {
+        input(a);
+        input(b);
+        input(c);
+        call calcPerimeter(inout perimeter, in a, in b, in c);
+        print(perimeter);
+
+        input(base);
+        input(height);
+        call calcArea(inout area, in base, in height);
+        print(area);
+    }.
