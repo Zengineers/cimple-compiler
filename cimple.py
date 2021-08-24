@@ -15,7 +15,7 @@
 #       .int file with the intermediate code
 #       .sym file with the symbol table
 #       .asm file with the final MIPS assembly code
-# if the cimple program has no function or procedure an extra C file is created
+# if the cimple program has no function or procedure an extra C file equivalent is created
 # which contains the intermediate code quads as low level C code
 #
 # TODO expand args to allow user to specify which files are created
