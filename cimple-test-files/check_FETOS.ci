@@ -1,0 +1,30 @@
+program Main
+	declare var1, var2, var22;
+	procedure Proc1(in var3, inout var4, in var72)
+		declare var5, var6;
+		function Func1()
+			declare aa;
+			{	aa:=3;
+				return(aa)
+			}
+		{	var3:=-123;
+			var4:=var3+2;
+			var72:=var4+4;
+			var6:=Func1();
+			print(var1)
+		}
+	function Func2(in a, inout b, inout c)
+		declare bb;
+		{	return(a)
+		}
+	{	var1:=55;
+		if(var1 < 123)
+		{
+			input(var1);
+			var2:=123
+		};
+		call Proc1(in var2, inout var1, in var22); 
+		var1 := Func2(in var1, inout var2, inout var22);
+		print(var1) 
+    }.
+

@@ -1,0 +1,23 @@
+program check
+
+    declare a,b,c;
+
+    {
+        input(a);
+        print(a);
+
+        if ([a > 10])
+        {
+            b := a;
+            print(b)
+        }
+        else
+        {
+            b := 100;
+        };
+        while(b>0){
+        
+            print(b);
+            b:=b-1;
+        };
+    }.

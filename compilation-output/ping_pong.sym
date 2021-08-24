@@ -1,0 +1,13 @@
+Scope 0:	(pingpong)
+	Variable entity: [ping]	offset: 12
+	Variable entity: [pong]	offset: 16
+	Variable entity: [CONTINUE]	offset: 20
+	Variable entity: [counter]	offset: 24
+	Variable entity: [delay]	offset: 28
+	Temp variable entity: [T_1]	offset: 32
+	Temp variable entity: [T_2]	offset: 36
+	Temp variable entity: [T_3]	offset: 40
+	Temp variable entity: [T_4]	offset: 44
+	Temp variable entity: [T_5]	offset: 48
+	Temp variable entity: [T_6]	offset: 52
+

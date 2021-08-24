@@ -1,0 +1,38 @@
+# 
+    calculates the distance based on the given input
+
+    u : speed 
+    to : start time
+    t : time
+    a : acceleration
+    uo : inital speed
+#
+
+program distance
+    
+    declare u, to, t, a;
+    declare uo;
+
+    function calculateInitialSpeed(in u, in a, in t)
+        declare uo;
+    {
+        uo := u - a * (t-to);
+        return(uo);
+    }
+
+    function calculateDistance(in uo, in to, in t, in a)
+        declare x;
+    {
+            x := uo * (t - to) + (a * (t - to) * (t - to)) / 2;
+            return(x);
+    }
+
+    {
+        input(u);
+        input(to);
+        input(t);
+        input(a);
+        uo := calculateInitialSpeed(in u, in a, in t);
+
+        print(calculateDistance(in uo, in to, in t, in a));
+    }.

@@ -1,0 +1,19 @@
+program checkC
+ 	declare a,b,c,d,e,f,g,x,k,y;
+    {
+	input(a);
+	b:=3;
+	e:=5;
+	f:=a;
+	if ([a>3]) 
+    {    x:=a;
+	     y:=b+e
+    }
+	else
+	     k:=f;
+	;
+	while([x<10])
+	      x:=y;
+	;
+	print(x)
+	}.

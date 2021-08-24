@@ -1,0 +1,141 @@
+#
+	logic gates and circuits simulation
+#
+
+program gates
+
+	declare X, Y, run;
+	declare Q1, Q2;
+
+
+	function OR(in A, in B)
+
+		declare C;
+		{
+			if (A = 0 and B = 0)
+			{
+				C := 0;
+			}
+			else
+			{
+				C := 1;
+			};
+
+			return (C);
+		}
+
+	function NOT(in A)
+
+		declare C;
+		{
+			if (A = 0)
+			{
+				C := 1;
+			}
+			else
+			{
+				C := 0;
+			}
+		}
+
+	function NAND(in A, in B)
+
+		declare C;
+		{	
+			if (A = 1 and B = 1)
+			{
+				C := 0;
+			}
+			else
+			{
+				C := 1;
+			};
+
+			return (C);
+		}
+
+	function NOR(in A, in B)
+
+		declare C;
+		{
+			if (A = 0 and B = 0)
+			{
+				C := 1;
+			}
+			else
+			{
+				C := 0;
+			};
+
+			return (C);
+		}
+
+	
+	procedure HALFADDER(in A, in B, inout Sum, inout Carry)
+
+		declare S, C;
+
+		function AND(in A, in B)
+
+			declare C;
+			{	
+				if (A = 1 and B = 1)
+				{
+					C := 1;
+				}
+				else
+				{
+					C := 0;
+				};
+
+				return (C);
+			}
+
+		function XOR(in A, in B)
+
+			declare C;
+			{
+				if ([A = 0 and B = 0] or [A = 1 and B = 1])
+				{
+					C := 0;
+				}
+				else 
+				{
+					C := 1;
+				};
+
+				return (C);
+			}
+
+		{
+			S := XOR(in A, in B);
+			C := AND(in A, in B);
+
+			Sum := S;
+			Carry := C;
+		}
+
+
+		
+	# main - random function calls #
+	{	
+		run := 1;
+
+		while (run = 1)
+		{
+			input(X);
+			input(Y);
+
+			call HALFADDER(in X, in Y, inout Q1, inout Q2);
+
+			print(Q1);
+			print(Q2);
+
+			input(run);
+		};
+
+		Q1 := NAND(in Q2, in X);
+		print(Q1);
+
+    }.
+

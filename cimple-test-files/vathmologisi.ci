@@ -1,0 +1,55 @@
+# calculates the project grade and final grade for the compilers class #
+# the code is purposefully more complex than necessary #
+
+
+
+program vathmologisi
+
+    declare ph1, ph2, ph3, ph4final, ph4report, project, exams, final;
+    declare phase1percentage, phase2percentage, phase3percentage, phase4percentageFinalCode, phase4percentageReport;
+    
+    function calculateProject(in ph1, in ph2, in ph3, in ph4final, in ph4report, in phase1percentage, in phase2percentage, in phase3percentage, in phase4percentageFinalCode, in phase4percentageReport)
+        declare ret;
+    {
+        ret := (phase1percentage * ph1) / 100;
+        ret := ret + (phase2percentage * ph2) / 100;
+        ret := ret + (phase3percentage * ph3) / 100;
+        ret := ret + (phase4percentageFinalCode * ph4final) / 100;
+        ret := ret + (phase4percentageReport * ph4report) / 100;
+
+        return (ret);
+    }
+
+    {   
+        phase1percentage := 10;
+        phase2percentage := 30;
+        phase3percentage := 10;
+        phase4percentageFinalCode := 30;
+        phase4percentageReport := 20;
+
+
+        print(phase1percentage);
+        input(ph1);
+
+        print(phase2percentage);
+        input(ph2);
+
+        print(phase3percentage);
+        input(ph3);
+
+        print(phase4percentageFinalCode);
+        input(ph4final);
+
+        print(phase4percentageReport);
+        input(ph4report);
+
+        input(exams);
+
+        project := calculateProject(in ph1, in ph2, in ph3, in ph4final, in ph4report, in phase1percentage, in phase2percentage, in phase3percentage, in phase4percentageFinalCode, in phase4percentageReport);
+        
+        print(project);
+
+        final := (project * 50) / 100 + (exams * 50) / 100;
+        print(final);
+
+    }.

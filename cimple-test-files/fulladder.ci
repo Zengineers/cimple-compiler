@@ -1,0 +1,83 @@
+#
+	full adder simulation
+#
+
+program FA
+
+	declare X, Y;
+	declare S, C;
+
+	procedure FULLADDER(in A, in B, in Cin, inout Sum, inout Cout)
+
+		declare S1, C;
+
+		function AND(in A, in B)
+
+			declare C;
+			{	
+				if (A = 1 and B = 1)
+				{
+					C := 1;
+				}
+				else
+				{
+					C := 0;
+				};
+
+				return (C);
+			}
+
+		function XOR(in A, in B)
+
+			declare C;
+			{
+				if ([A = 0 and B = 0] or [A = 1 and B = 1])
+				{
+					C := 0;
+				}
+				else 
+				{
+					C := 1;
+				};
+
+				return (C);
+			}
+
+        function OR(in A, in B)
+
+            declare C;
+            {
+                if (A = 0 and B = 0)
+                {
+                    C := 0;
+                }
+                else
+                {
+                    C := 1;
+                };
+
+                return (C);
+            }
+
+		{
+			S1 := XOR(in A, in B);
+			C1 := AND(in S1, in Cin);
+            C2 := AND(in A, in B);
+
+			Sum := XOR(in S1, in Cin);
+			Cout := OR(in C1, in C2);
+		}
+
+
+		
+	# main #
+	{	
+        input(X);
+        input(Y);
+
+        call FULLADDER(in X, in Y, inout s, inout c);
+
+        print(S);
+        print(C);
+    }.
+

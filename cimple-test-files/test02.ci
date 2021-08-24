@@ -20,6 +20,11 @@ program ProgramName2
             case (k>10) k:=k*2;
             default k:=0;
 	      ;
+        incase
+	         case (k>20) k:=k-2;
+		     case (k>2) k:=k*2;
+		     case (k>0) k:=k;
+	      ;
     
         input(A);
         print(A);

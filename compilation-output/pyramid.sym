@@ -1,0 +1,11 @@
+Scope 0:	(pyramid)
+	Variable entity: [rows]	offset: 12
+	Variable entity: [i]	offset: 16
+	Variable entity: [j]	offset: 20
+	Variable entity: [line]	offset: 24
+	Temp variable entity: [T_1]	offset: 28
+	Temp variable entity: [T_2]	offset: 32
+	Temp variable entity: [T_3]	offset: 36
+	Temp variable entity: [T_4]	offset: 40
+	Temp variable entity: [T_5]	offset: 44
+

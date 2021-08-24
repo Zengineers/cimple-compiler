@@ -1,0 +1,6 @@
+Scope 0:	(countDigits)
+	Variable entity: [x]	offset: 12
+	Variable entity: [count]	offset: 16
+	Temp variable entity: [T_1]	offset: 20
+	Temp variable entity: [T_2]	offset: 24
+

@@ -1,0 +1,46 @@
+program ProgramName1
+	declare var1, var2, var22;
+	procedure ProcedureName1(in var3, inout var4, in var72)
+
+		declare var5, var6;
+		function FunctionName1()
+			declare aa;
+			procedure ProcedureName2()
+				  procedure ProcedureName3()
+				      var6:=222;
+				  
+				  {  aa:=3;
+			         var3:=324;
+				     var4:=444
+				  }
+			return(aa);
+		{  var3:=123;
+		   var4:=var3+2;
+		   var72:=var4+4;
+		   var6:=var5;
+		   print(var1);
+		   if(not [var6>var3] or 123 > var1) {
+		       var6:=5
+		   }
+		   else{
+		       var6:=44 
+		   };
+		   var3:=0;
+		   while(var3<5){
+		       var3:=var3+1
+		   }
+        }		   
+	function FunctionName2(in a, inout b, inout c)
+		declare bb;
+		return(a);
+	function FunctionName3(in a, inout b, inout c)
+		declare cc, dd;
+		return(5);
+	{  var1:=55;
+	   if(var1 < 123) {
+		var2:=123
+       };
+	   call ProcedureName1(in var2, inout var1, in var22); 
+	   var1 := FunctionName3(in var1, inout var2, inout var22);
+	   print(var1)
+    }.

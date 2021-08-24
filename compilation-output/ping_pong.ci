@@ -1,0 +1,64 @@
+# 0 is the ball! #
+# enter 0 to continue #
+# or !0 to stop #
+
+program pingpong
+
+    declare ping, pong;
+    declare CONTINUE, counter;
+    declare delay;
+
+    {   
+        CONTINUE := 0;
+        counter := 0;
+
+        ping := 0;
+        pong := 111111110;
+
+        while (not[CONTINUE <> 0] and [ping >= 0 and pong >= 0]) 
+        {
+            if (ping < pong)
+            {
+                print(ping);
+
+                if (ping = 0)
+                {
+                    ping :=  10;
+                }
+                else
+                {
+                    ping := ping * 10 + 10;
+                };
+            }
+            else
+            {
+                if (pong = 0)
+                {
+                    ping := pong;
+                    pong := 111111110;
+                    counter := counter + 1;
+                }
+                else
+                {
+                    print(pong);
+
+                    pong := pong / 10 - 1;
+                };
+            };
+
+            # add some delay between each print #
+            delay := 9999999;
+            while (delay > 0)
+            {
+                delay := delay -1;
+            };
+
+            # ask for permission to CONTINUE after some time #
+            if (counter = 50)
+            {
+                print(CONTINUE);
+                input(CONTINUE);
+                counter := 0;
+            };
+        };
+    }.

@@ -1,0 +1,40 @@
+# uses print to form a vertical pyramid #
+
+program pyramid
+    declare rows, i, j, line;
+    {
+        # get the number of rows #
+        # rows >= 10 for full pyramid #
+        input(rows);
+
+        i:=1;
+        line:=i;
+        while (i <= rows)
+        {
+            if (i = 1)
+            {
+                print(line);
+            };
+
+            if (i > 5)
+            {
+                if (i > 10)
+                {
+                    i := rows+1;
+                }
+                else
+                {
+                    line := line/10;
+                    print(line);
+                };
+            }
+
+            else
+            {
+            line := line*10+1;
+            print(line);
+            };
+
+            i := i+1;
+        };
+    }.
