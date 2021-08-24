@@ -32,9 +32,9 @@ the final code produced is in MIPS32 assembly.
     &emsp;&emsp;    -asm: print final assembly code on screen
 
 * By default the compiler creates 3 files:\
-       .int file with the intermediate code\
-       .sym file with the symbol table\
-       .asm file with the final MIPS assembly code
+    &emsp;   .int file with the intermediate code\
+    &emsp;   .sym file with the symbol table\
+    &emsp;   .asm file with the final MIPS assembly code
    
 * If the cimple program has no function or procedure an extra C file equivalent is created\
     which contains the intermediate code quads as low level C code. (can be compiled with any C compiler)
