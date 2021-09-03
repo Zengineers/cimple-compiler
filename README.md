@@ -6,7 +6,7 @@
 Cimple is a simplified version of the C programming language with educational purposes.\
 Its capabilities are limited, however, it contains many well-known control flow statements. \
 Cimple program files have a .ci extension. A full language description can be found in the report\
-files (ENG or GR). The compiler was developed for the Compilers course [@cse.uoi.gr](https://www.cs.uoi.gr/) and\
+file (GR). The compiler was developed for the Compilers course [@cse.uoi.gr](https://www.cs.uoi.gr/) and\
 the final code produced is in MIPS32 assembly.
 <br><br>
 
