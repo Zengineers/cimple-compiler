@@ -16,7 +16,7 @@ the final code produced is in MIPS32 assembly.
 * `cimple.py`: the compiler
 * `cimple-test-files`: various Cimple programs used for testing purposes
 * `compilation-output`: examples of the files created from the compilation
-* `report`: thorough project reports in both English and Greek.
+* `report`: thorough project report.
 * `cleanup.py`: used to clean any unwanted files created from the compilation
 <br><br>
 
